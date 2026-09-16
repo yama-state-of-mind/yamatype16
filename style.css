@@ -735,13 +735,25 @@ body {
   position: relative;
   font-size: 10.5px;
   color: var(--pine);
-  line-height: 1.6;
+  line-height: 1.7;
   text-align: left;
   background: #EDF3EF;
   border-radius: 12px;
   padding: 7px 10px;
-  white-space: nowrap;
 }
+.tease-bubble .tease-line1 { white-space: nowrap; }
+.tease-bubble .tease-line2 {
+  display: block;
+  margin-top: 2px;
+  color: var(--stone);
+  font-size: 10px;
+}
+.tease-bubble .tease-line2 a {
+  color: var(--stone);
+  font-weight: 700;
+  text-decoration: none;
+}
+.tease-bubble .tease-line2 a:hover { text-decoration: underline; }
 .tease-bubble::before {
   content: "";
   position: absolute;
@@ -751,21 +763,6 @@ body {
   border-bottom: 6px solid transparent;
   border-right: 7px solid #EDF3EF;
 }
-
-/* X・YAMAPのフォロー案内。目立たせすぎない控えめな文字サイズ */
-.tease-follow {
-  margin-top: 8px;
-  text-align: center;
-  font-size: 10.5px;
-  color: var(--stone);
-  line-height: 1.7;
-}
-.tease-follow a {
-  color: var(--stone);
-  font-weight: 700;
-  text-decoration: none;
-}
-.tease-follow a:hover { text-decoration: underline; }
 
 /* トースト */
 .toast {
