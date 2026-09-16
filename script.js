@@ -881,12 +881,49 @@ function downloadBlob(blob, name) {
 
 /* 結果に合わせてモーダルの中身を用意する（showResultから呼ばれる） */
 let shareData = null;   // いまの結果。PNG生成やボタンから参照する
+// シークレットキャラの匂わせシルエット用：動物本体だけを抜き出したデータ
+// （月・星・止まり木などの背景演出は除いてある。characters.jsのSECRET_CHARACTERSと対で管理）
+const TEASE_SILHOUETTES = {
+  bat: `
+    <path d="M66 34 Q40 30 20 44 Q8 54 8 70 Q24 58 42 60 Q34 72 34 86
+             Q54 76 66 58 Z" fill="#4A3E48"/>
+    <path d="M94 34 Q120 30 140 44 Q152 54 152 70 Q136 58 118 60 Q126 72 126 86
+             Q106 76 94 58 Z" fill="#4A3E48"/>
+    <ellipse cx="80" cy="56" rx="22" ry="25" fill="#5C4E5A"/>
+    <ellipse cx="80" cy="50" rx="13" ry="16" fill="#7A6A76"/>
+    <path d="M58 118 Q52 142 68 134 Q66 122 70 112 Z" fill="#5C4E5A"/>
+    <path d="M102 118 Q108 142 92 134 Q94 122 90 112 Z" fill="#5C4E5A"/>
+    <circle cx="80" cy="98" r="25" fill="#6A5A66"/>
+    <ellipse cx="80" cy="86" rx="12" ry="9" fill="#8A7684"/>
+    <path d="M56 112 Q80 124 104 112 L102 105 Q80 116 58 105 Z" fill="#3E4A52"/>
+    <rect x="69" y="114" width="22" height="15" rx="4" fill="#4E6B7A"/>
+    <circle cx="80" cy="121.5" r="5.2" fill="#FFE9A8"/>`,
+  ptarmigan: `
+    <ellipse cx="110" cy="110" rx="18" ry="9" fill="#E4EBF0" transform="rotate(20 110 110)"/>
+    <circle cx="80" cy="101" r="33" fill="#FDFEFE"/>
+    <ellipse cx="80" cy="108" rx="21" ry="20" fill="#FFFFFF"/>
+    <ellipse cx="54" cy="102" rx="11" ry="17" fill="#F0F5F8" transform="rotate(-8 54 102)"/>
+    <ellipse cx="106" cy="102" rx="11" ry="17" fill="#F0F5F8" transform="rotate(8 106 102)"/>
+    <ellipse cx="70" cy="128" rx="10" ry="10" fill="#F2F7FA"/>
+    <ellipse cx="90" cy="128" rx="10" ry="10" fill="#F2F7FA"/>
+    <circle cx="80" cy="58" r="27" fill="#FFFFFF"/>`,
+};
+function renderTeaseSilhouettes() {
+  const box = document.getElementById("tease-silhouettes");
+  if (!box) return;
+  box.innerHTML =
+    `<svg viewBox="0 0 160 160" class="char">${TEASE_SILHOUETTES.bat}</svg>` +
+    `<svg viewBox="0 0 160 160" class="char">${TEASE_SILHOUETTES.ptarmigan}</svg>` +
+    `<svg class="spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l2.2 6.8H21l-5.6 4.1L17.6 20 12 15.8 6.4 20l2.2-7.1L3 8.8h6.8z"/></svg>`;
+}
+
 function fillShareModal(d) {
   shareData = d;
   sharePngCache = null;   // 結果が変わったら作り直す
   const pv = $("#smodal-pv");
   if (!pv) return;
   pv.innerHTML = shareImageSVG(d);
+  renderTeaseSilhouettes();
 
   // X：文章にURLを書き込み済みなので、textだけを渡す（urlを別で足すと二重に付くため）
   $("#sm-x").href =
