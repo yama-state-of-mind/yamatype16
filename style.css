@@ -740,6 +740,7 @@ body {
   background: #EDF3EF;
   border-radius: 12px;
   padding: 7px 10px;
+  white-space: nowrap;
 }
 .tease-bubble::before {
   content: "";
