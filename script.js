@@ -275,42 +275,35 @@ renderAboutSection();
    肉球・鳥・ひづめ・翼（コウモリ）の4種類。すべてcurrentColorで塗るので、
    使う場所のCSSのcolorだけで色を変えられる
    ========================================================= */
-const FOOTPRINTS = {
-  paw: `<svg viewBox="0 0 100 100">
-    <ellipse cx="50" cy="66" rx="24" ry="20" fill="currentColor"/>
-    <ellipse cx="24" cy="34" rx="10" ry="13" fill="currentColor" transform="rotate(-18 24 34)"/>
-    <ellipse cx="42" cy="20" rx="10" ry="13" fill="currentColor" transform="rotate(-6 42 20)"/>
-    <ellipse cx="60" cy="20" rx="10" ry="13" fill="currentColor" transform="rotate(6 60 20)"/>
-    <ellipse cx="78" cy="34" rx="10" ry="13" fill="currentColor" transform="rotate(18 78 34)"/>
-  </svg>`,
-  bird: `<svg viewBox="0 0 100 100">
-    <path d="M50 92 L50 46" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
-    <path d="M50 46 L20 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
-    <path d="M50 46 L50 6"  stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
-    <path d="M50 46 L80 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
-    <path d="M50 92 L38 78" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
-  </svg>`,
-  hoof: `<svg viewBox="0 0 100 100">
-    <path d="M48 12 C34 12 26 28 28 48 C30 66 38 82 48 86 C50 74 50 24 48 12 Z" fill="currentColor" transform="translate(-3 0)"/>
-    <path d="M52 12 C66 12 74 28 72 48 C70 66 62 82 52 86 C50 74 50 24 52 12 Z" fill="currentColor" transform="translate(3 0)"/>
-  </svg>`,
-  wing: `<svg viewBox="0 0 100 100">
-    <path d="M50 70 C34 66 20 54 14 34 C24 40 32 42 40 40 C34 30 30 20 30 10
-             C40 18 46 28 48 38 C48 26 50 14 54 6 C58 16 58 28 56 38
-             C62 26 68 18 76 12 C74 22 68 32 60 40 C68 40 76 36 84 28
-             C80 46 68 58 54 64 Z" fill="currentColor"/>
-    <ellipse cx="50" cy="78" rx="10" ry="8" fill="currentColor"/>
-  </svg>`,
+/* 動物ごとに専用の足跡（16タイプ＋シークレット2種、計18種類） */
+const FOOTPRINTS_BY_TYPE = {
+  EGFA: `<svg viewBox="0 0 100 100"><ellipse cx="36" cy="28" rx="9" ry="20" fill="currentColor" transform="rotate(-12 36 28)"/> <ellipse cx="64" cy="28" rx="9" ry="20" fill="currentColor" transform="rotate(12 64 28)"/> <circle cx="47" cy="66" r="8" fill="currentColor"/> <circle cx="53" cy="84" r="8" fill="currentColor"/></svg>`,
+  EGFC: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="70" rx="14" ry="11" fill="currentColor"/> <ellipse cx="28" cy="42" rx="4.2" ry="9" fill="currentColor" transform="rotate(-34 28 42)"/> <ellipse cx="39" cy="28" rx="4.2" ry="10.5" fill="currentColor" transform="rotate(-15 39 28)"/> <ellipse cx="50" cy="23" rx="4.2" ry="11" fill="currentColor"/> <ellipse cx="61" cy="28" rx="4.2" ry="10.5" fill="currentColor" transform="rotate(15 61 28)"/> <ellipse cx="72" cy="42" rx="4.2" ry="9" fill="currentColor" transform="rotate(34 72 42)"/></svg>`,
+  EGLA: `<svg viewBox="0 0 100 100"><path d="M50 46 L20 12 Q50 28 80 12 Z" fill="currentColor" opacity=".55"/> <path d="M50 92 L50 46" stroke="currentColor" stroke-width="8" stroke-linecap="round"/> <path d="M50 46 L28 12" stroke="currentColor" stroke-width="8" stroke-linecap="round"/> <path d="M50 46 L50 6" stroke="currentColor" stroke-width="8" stroke-linecap="round"/> <path d="M50 46 L72 12" stroke="currentColor" stroke-width="8" stroke-linecap="round"/> <path d="M50 92 L38 78" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg>`,
+  EGLC: `<svg viewBox="0 0 100 100"><path d="M44 12 C30 12 22 28 24 48 C26 66 35.2 82 44 86 C46 74 46 24 44 12 Z" fill="currentColor"/> <path d="M56 12 C70 12 78 28 76 48 C74 66 64.8 82 56 86 C54 74 54 24 56 12 Z" fill="currentColor"/></svg>`,
+  ESFA: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="72" rx="14" ry="18" fill="currentColor"/> <ellipse cx="34" cy="34" rx="6.5" ry="10" fill="currentColor" transform="rotate(-16 34 34)"/> <ellipse cx="45" cy="22" rx="6.5" ry="11" fill="currentColor" transform="rotate(-5 45 22)"/> <ellipse cx="57" cy="22" rx="6.5" ry="11" fill="currentColor" transform="rotate(5 57 22)"/> <ellipse cx="68" cy="34" rx="6.5" ry="10" fill="currentColor" transform="rotate(16 68 34)"/></svg>`,
+  ESFC: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="70" rx="19" ry="16" fill="currentColor"/> <ellipse cx="33" cy="38" rx="7.5" ry="9" fill="currentColor" transform="rotate(-18 33 38)"/> <ellipse cx="44" cy="29" rx="7.5" ry="10" fill="currentColor" transform="rotate(-6 44 29)"/> <ellipse cx="57" cy="29" rx="7.5" ry="10" fill="currentColor" transform="rotate(6 57 29)"/> <ellipse cx="68" cy="38" rx="7.5" ry="9" fill="currentColor" transform="rotate(18 68 38)"/></svg>`,
+  ESLA: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="70" rx="18" ry="15" fill="currentColor"/> <ellipse cx="28" cy="40" rx="6.5" ry="9" fill="currentColor" transform="rotate(-28 28 40)"/> <ellipse cx="40" cy="28" rx="6.5" ry="9.5" fill="currentColor" transform="rotate(-10 40 28)"/> <ellipse cx="52" cy="25" rx="6.5" ry="9.5" fill="currentColor"/> <ellipse cx="64" cy="28" rx="6.5" ry="9.5" fill="currentColor" transform="rotate(10 64 28)"/> <ellipse cx="76" cy="40" rx="6.5" ry="9" fill="currentColor" transform="rotate(28 76 40)"/></svg>`,
+  ESLC: `<svg viewBox="0 0 100 100"><g transform="translate(9.0 9.0) scale(0.82)">   <ellipse cx="50" cy="70" rx="14" ry="11" fill="currentColor"/>   <ellipse cx="30" cy="46" rx="4.6" ry="6.5" fill="currentColor" transform="rotate(-30 30 46)"/>   <ellipse cx="41" cy="35" rx="4.6" ry="6.8" fill="currentColor" transform="rotate(-12 41 35)"/>   <ellipse cx="50" cy="32" rx="4.6" ry="6.8" fill="currentColor"/>   <ellipse cx="59" cy="35" rx="4.6" ry="6.8" fill="currentColor" transform="rotate(12 59 35)"/>   <ellipse cx="70" cy="46" rx="4.6" ry="6.5" fill="currentColor" transform="rotate(30 70 46)"/> </g></svg>`,
+  PGFA: `<svg viewBox="0 0 100 100"><ellipse cx="52" cy="66" rx="20" ry="17" fill="currentColor"/> <ellipse cx="32" cy="38" rx="6" ry="9" fill="currentColor" transform="rotate(-20 32 38)"/> <ellipse cx="45" cy="26" rx="6" ry="10" fill="currentColor" transform="rotate(-6 45 26)"/> <ellipse cx="59" cy="24" rx="6" ry="10" fill="currentColor" transform="rotate(6 59 24)"/> <ellipse cx="72" cy="32" rx="6" ry="9.5" fill="currentColor" transform="rotate(22 72 32)"/> <ellipse cx="20" cy="66" rx="7" ry="10" fill="currentColor" transform="rotate(-72 20 66)"/></svg>`,
+  PGFC: `<svg viewBox="0 0 100 100"><path d="M50 92 L50 46" stroke="currentColor" stroke-width="6" stroke-linecap="round"/> <path d="M50 46 L25 12" stroke="currentColor" stroke-width="6" stroke-linecap="round"/> <path d="M50 46 L50 6" stroke="currentColor" stroke-width="6" stroke-linecap="round"/> <path d="M50 46 L75 12" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg>`,
+  PGLA: `<svg viewBox="0 0 100 100"><path d="M50 92 L50 46" stroke="currentColor" stroke-width="9" stroke-linecap="round"/> <path d="M50 46 L21 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/> <path d="M50 46 L50 6" stroke="currentColor" stroke-width="9" stroke-linecap="round"/> <path d="M50 46 L79 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/> <path d="M50 92 L38 78" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>`,
+  PGLC: `<svg viewBox="0 0 100 100"><path d="M50 46 L20 12 Q50 28 80 12 Z" fill="currentColor" opacity=".55"/> <path d="M50 92 L50 46" stroke="currentColor" stroke-width="11" stroke-linecap="round"/> <path d="M50 46 L23 12" stroke="currentColor" stroke-width="11" stroke-linecap="round"/> <path d="M50 46 L50 6" stroke="currentColor" stroke-width="11" stroke-linecap="round"/> <path d="M50 46 L77 12" stroke="currentColor" stroke-width="11" stroke-linecap="round"/> <path d="M50 92 L38 78" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>`,
+  PSFA: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="70" rx="26" ry="18" fill="currentColor"/> <ellipse cx="24" cy="38" rx="7" ry="9" fill="currentColor" transform="rotate(-30 24 38)"/> <circle cx="20" cy="30" r="2" fill="currentColor"/> <ellipse cx="38" cy="25" rx="8" ry="10.5" fill="currentColor" transform="rotate(-12 38 25)"/> <circle cx="34" cy="15" r="2.1" fill="currentColor"/> <ellipse cx="54" cy="21" rx="9" ry="12" fill="currentColor"/> <circle cx="54" cy="9" r="2.3" fill="currentColor"/> <ellipse cx="70" cy="26" rx="9.5" ry="12.5" fill="currentColor" transform="rotate(14 70 26)"/> <circle cx="75" cy="14" r="2.4" fill="currentColor"/> <ellipse cx="83" cy="40" rx="8.5" ry="10.5" fill="currentColor" transform="rotate(30 83 40)"/> <circle cx="90" cy="32" r="2.2" fill="currentColor"/></svg>`,
+  PSFC: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="68" rx="15" ry="12" fill="currentColor"/> <ellipse cx="27" cy="40" rx="5.5" ry="8" fill="currentColor" transform="rotate(-32 27 40)"/> <ellipse cx="38" cy="28" rx="5.5" ry="8" fill="currentColor" transform="rotate(-14 38 28)"/> <ellipse cx="50" cy="24" rx="5.5" ry="8" fill="currentColor"/> <ellipse cx="62" cy="28" rx="5.5" ry="8" fill="currentColor" transform="rotate(14 62 28)"/> <ellipse cx="73" cy="40" rx="5.5" ry="8" fill="currentColor" transform="rotate(32 73 40)"/></svg>`,
+  PSLA: `<svg viewBox="0 0 100 100"><path d="M50 92 L50 46" stroke="currentColor" stroke-width="10" stroke-linecap="round"/> <path d="M50 46 L19 12" stroke="currentColor" stroke-width="10" stroke-linecap="round"/> <path d="M50 46 L50 6" stroke="currentColor" stroke-width="10" stroke-linecap="round"/> <path d="M50 46 L81 12" stroke="currentColor" stroke-width="10" stroke-linecap="round"/> <path d="M50 92 L38 78" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>`,
+  PSLC: `<svg viewBox="0 0 100 100"><path d="M46 12 C32 12 24 28 26 48 C28 66 37.2 82 46 86 C48 74 48 24 46 12 Z" fill="currentColor"/> <path d="M54 12 C68 12 76 28 74 48 C72 66 62.8 82 54 86 C52 74 52 24 54 12 Z" fill="currentColor"/></svg>`,
+  "secret-bat": `<svg viewBox="0 0 100 100"><path d="M50 70 C34 66 20 54 14 34 C24 40 32 42 40 40 C34 30 30 20 30 10        C40 18 46 28 48 38 C48 26 50 14 54 6 C58 16 58 28 56 38        C62 26 68 18 76 12 C74 22 68 32 60 40 C68 40 76 36 84 28        C80 46 68 58 54 64 Z" fill="currentColor"/> <ellipse cx="50" cy="78" rx="10" ry="8" fill="currentColor"/></svg>`,
+  "secret-ptarmigan": `<svg viewBox="0 0 100 100"><path d="M50 46 L20 12 Q50 28 80 12 Z" fill="currentColor" opacity=".55"/> <path d="M50 92 L50 46" stroke="currentColor" stroke-width="13" stroke-linecap="round"/> <path d="M50 46 L23 12" stroke="currentColor" stroke-width="13" stroke-linecap="round"/> <path d="M50 46 L50 6" stroke="currentColor" stroke-width="13" stroke-linecap="round"/> <path d="M50 46 L77 12" stroke="currentColor" stroke-width="13" stroke-linecap="round"/> <path d="M50 92 L38 78" stroke="currentColor" stroke-width="12" stroke-linecap="round"/></svg>`,
 };
 
-// 診断タイプ・シークレット → 足跡の種類
-const TYPE_FOOTPRINT = {
-  PSLC: "hoof", PSLA: "bird", PSFC: "paw", PSFA: "paw",
-  PGLC: "bird", PGLA: "bird", PGFC: "bird", PGFA: "paw",
-  ESLC: "paw",  ESLA: "paw",  ESFC: "paw",  ESFA: "paw",
-  EGLC: "hoof", EGLA: "bird", EGFC: "paw",  EGFA: "paw",
-};
-const SECRET_FOOTPRINT = { bat: "wing", ptarmigan: "bird" };
+// FOOTPRINTSという名前は他の箇所（背景散らし・区切り線）から共通で参照されるので、
+// 中身をタイプ別データに差し替える形にしている
+const FOOTPRINTS = FOOTPRINTS_BY_TYPE;
+
+// 診断タイプ・シークレット → 足跡（そのまま自分自身のコードを使う）
+// シークレットのidは通常のタイプコードと書式が違うので、対応表だけ残す
+const SECRET_FOOTPRINT = { bat: "secret-bat", ptarmigan: "secret-ptarmigan" };
 
 function footprintInner(key) {
   return (FOOTPRINTS[key] || FOOTPRINTS.paw).trim().replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
@@ -876,7 +869,7 @@ function showResult() {
   // 結果の区切り線は、診断結果の動物の足跡で固定（シークレットならシークレット側の種類）
   const resultDivider = document.getElementById("result-footprint-divider");
   if (resultDivider) {
-    resultFootprintKey = secret ? (SECRET_FOOTPRINT[secret.id] || "paw") : (TYPE_FOOTPRINT[code] || "paw");
+    resultFootprintKey = secret ? (SECRET_FOOTPRINT[secret.id] || "PGLA") : code;
     resultDivider.innerHTML = trailDividerSVG(resultFootprintKey, resultDivider.clientWidth || resultDivider.getBoundingClientRect().width);
   }
 
@@ -885,6 +878,7 @@ function showResult() {
     : characterSVG(code, "char char-lg");
   $("#result-animal").textContent = secret ? secret.animal : (ch ? ch.animal : type.name);
   $("#result-name").textContent = secret ? secret.typeName : type.name;
+  $("#result-animal-print").innerHTML = `<svg viewBox="0 0 100 100">${footprintInner(resultFootprintKey)}</svg>`;
   $("#secret-badge").hidden = !secret;
   $("#secret-lead").hidden = !secret;
   $("#secret-spark").hidden = !secret;
