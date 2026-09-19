@@ -338,6 +338,7 @@ function trailDividerSVG(footKey, pxWidth) {
 /* トップページの区切り：足跡の種類はランダム（毎回変わる）。
    種類は一度選んだら、リサイズ時も同じ種類を保つ */
 let heroFootprintKey = null;
+let aboutFootprintKey = null;
 let resultFootprintKey = null;
 function renderHeroFootprintDivider() {
   const box = document.getElementById("hero-footprint-divider");
@@ -349,6 +350,18 @@ function renderHeroFootprintDivider() {
   box.innerHTML = trailDividerSVG(heroFootprintKey, box.clientWidth || box.getBoundingClientRect().width);
 }
 renderHeroFootprintDivider();
+
+/* about セクション末尾（16タイプの詳細をもっと見る の下）の区切り。こちらもランダム */
+function renderAboutFootprintDivider() {
+  const box = document.getElementById("about-footprint-divider");
+  if (!box) return;
+  if (!aboutFootprintKey) {
+    const keys = Object.keys(FOOTPRINTS);
+    aboutFootprintKey = keys[Math.floor(Math.random() * keys.length)];
+  }
+  box.innerHTML = trailDividerSVG(aboutFootprintKey, box.clientWidth || box.getBoundingClientRect().width);
+}
+renderAboutFootprintDivider();
 
 /* =========================================================
    余白の足跡散らし（ページ全体・全画面共通）
@@ -445,6 +458,7 @@ function scheduleScatterUpdate() {
     renderScatterChars();
     // 区切り線も、幅が変わったら足跡の個数を計算し直す（種類は変えない）
     renderHeroFootprintDivider();
+    renderAboutFootprintDivider();
     const resultDivider = document.getElementById("result-footprint-divider");
     if (resultDivider && resultFootprintKey) {
       resultDivider.innerHTML = trailDividerSVG(resultFootprintKey, resultDivider.clientWidth || resultDivider.getBoundingClientRect().width);
