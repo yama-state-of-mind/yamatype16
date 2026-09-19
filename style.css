@@ -918,7 +918,7 @@ body {
   align-items: center;
   gap: 8px;
 }
-.animal-footprint { width: 20px; height: 20px; flex: none; color: var(--stone); opacity: .7; }
+.animal-footprint { width: 20px; height: 20px; flex: none; color: var(--stone); opacity: .7; transform: translateY(-3px); }
 .animal-footprint svg { width: 100%; height: 100%; }
 .result-name {
   font-size: 13.5px;
@@ -1205,7 +1205,7 @@ body.header-visible .group-tabs { top: var(--header-h, 57px); }
   font-size: 21px; font-weight: 900; margin-top: 6px; line-height: 1.35;
   display: flex; align-items: center; gap: 6px;
 }
-.ti-name .animal-footprint { width: 16px; height: 16px; flex: none; color: var(--stone); opacity: .6; }
+.ti-name .animal-footprint { width: 16px; height: 16px; flex: none; color: var(--stone); opacity: .6; transform: translateY(-2px); }
 .ti-name .animal-footprint svg { width: 100%; height: 100%; }
 .tc-type { font-size: 12.5px; font-weight: 700; color: var(--stone); margin-top: 3px; }
 .tc-copy { font-size: 13.5px; font-weight: 700; color: var(--fjord); margin-top: 6px; line-height: 1.6; }
