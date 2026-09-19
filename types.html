@@ -303,11 +303,21 @@ routeFromURL();
   if (!header) return;
   let lastY = window.scrollY;
   let ticking = false;
+
+  function setHeaderVisible(visible) {
+    header.classList.toggle("show", visible);
+    document.body.classList.toggle("header-visible", visible);
+    if (visible) {
+      // タブ側で使う「ヘッダーの高さ分」を、実測してCSS変数に反映する
+      document.documentElement.style.setProperty("--header-h", header.getBoundingClientRect().height + "px");
+    }
+  }
+
   function onScroll() {
     const y = window.scrollY;
-    if (y < 80) header.classList.remove("show");
-    else if (y < lastY) header.classList.add("show");
-    else if (y > lastY) header.classList.remove("show");
+    if (y < 80) setHeaderVisible(false);
+    else if (y < lastY) setHeaderVisible(true);
+    else if (y > lastY) setHeaderVisible(false);
     lastY = y;
   }
   window.addEventListener("scroll", () => {

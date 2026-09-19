@@ -1127,6 +1127,12 @@ body {
   z-index: 5;
   background: var(--birch);
   padding: 8px 0;
+  transition: top .28s ease;
+}
+/* スクロール追従ヘッダーが出ている間だけ、タブをヘッダーの高さ分下げる（重なり防止） */
+body.header-visible .group-tabs { top: var(--header-h, 57px); }
+@media (prefers-reduced-motion: reduce) {
+  .group-tabs { transition: none; }
 }
 .gtab {
   font-family: inherit;
