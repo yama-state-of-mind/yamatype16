@@ -32,8 +32,6 @@ body {
 }
 
 .app {
-  max-width: 480px;
-  margin: 0 auto;
   min-height: 100dvh;
   position: relative;
 }
@@ -42,8 +40,15 @@ body {
 .screen {
   display: none;
   min-height: 100dvh;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
   padding: max(20px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
   flex-direction: column;
+}
+/* スタート画面だけ、タブレット/PC幅で横に広げる（質問・結果画面は現行幅を維持） */
+@media (min-width: 768px) {
+  #screen-start { max-width: 1200px; }
 }
 .screen.is-active { display: flex; animation: screenIn .45s ease both; }
 
@@ -95,7 +100,9 @@ body {
    スタート画面
    ========================================================= */
 .hero {
-  margin: auto 0;
+  margin: auto;
+  max-width: 480px;
+  width: 100%;
   text-align: center;
   padding: 24px 0;
 }
@@ -765,6 +772,78 @@ body {
 }
 
 /* トースト */
+/* =========================================================
+   スクロール連動アニメーション（Intersection Observerで発火）
+   ※ 既存の結果画面の登場演出が「.reveal」という名前をすでに使っていたため、
+     名前がぶつからないよう、ここだけ「.sr-reveal」（scroll reveal）にしている
+   ========================================================= */
+.sr-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.sr-reveal.in-view { opacity: 1; transform: none; }
+
+.sr-reveal-pop {
+  opacity: 0;
+  transform: scale(.9) translateY(10px);
+  transition: opacity .45s ease, transform .45s cubic-bezier(.2, .7, .3, 1);
+  transition-delay: var(--reveal-d, 0s);
+}
+.sr-reveal-pop.in-view { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-reveal, .sr-reveal-pop { transition: none; }
+}
+/* =========================================================
+   スクロール追従ヘッダー（トップページ・16タイプ詳細ページ用）
+   ========================================================= */
+.scroll-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 60;
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: rgba(243, 246, 244, .92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(30, 58, 49, .1);
+  transform: translateY(-100%);
+  transition: transform .28s ease;
+}
+.scroll-header.show { transform: translateY(0); }
+.scroll-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sh-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 900;
+  color: var(--pine);
+  text-decoration: none;
+}
+.sh-logo svg { width: 22px; height: 22px; flex: none; }
+.sh-cta {
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--pine);
+  border-radius: 999px;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-header { transition: none; }
+}
 .toast {
   position: fixed;
   left: 50%;
@@ -858,6 +937,17 @@ body {
   gap: 10px;
 }
 .result .hero-link { margin-top: 20px; }
+
+/* 足跡の区切り線（歩行風：一方向・左右交互のわずかなずれ） */
+.footprint-divider {
+  margin: 20px auto;
+  width: 100%;
+  max-width: 100%;
+  color: var(--stone);
+  opacity: .6;
+}
+.footprint-divider svg { display: block; width: 100%; height: auto; }
+
 .hero-link a {
   display: inline-block;
   font-size: 12.5px;
@@ -1881,6 +1971,55 @@ body {
 .site-foot a:hover { color: var(--pine); background: rgba(255, 255, 255, .7); }
 .site-foot a:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 .site-foot svg { width: 13px; height: 13px; display: block; }
+
+/* =========================================================
+   トップページ：about統合セクション（旧 about.html の中身）
+   ========================================================= */
+.about-section { margin-top: 8px; }
+.about-inner { text-align: left; }
+.about-lead { text-align: center; margin-bottom: 22px; }
+.about-lead h2 { font-size: 20px; font-weight: 900; }
+.about-lead p { font-size: 13px; color: var(--stone); margin-top: 6px; line-height: 1.8; }
+
+/* PC/タブレット幅：about全体（4軸・生息エリア・マトリクス）を1つの幅に統一。 */
+.about-inner, #about-matrix-wrap {
+  max-width: 480px;
+  margin: 0 auto;
+}
+#about-matrix-wrap { margin-top: 8px; }
+
+/* =========================================================
+   余白の足跡散らし（ページ全体・全画面共通）
+   body直下の全高レイヤーに、JSで動的に配置する。動物本体ではなく足跡そのものなので、
+   地面の跡らしく静止させたまま、薄い色で軽く敷いておく
+   ========================================================= */
+#scatter-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+.scatter-print {
+  position: absolute;
+  color: var(--stone);
+  opacity: .13;
+}
+.scatter-print svg { display: block; width: 100%; height: auto; }
+
+/* マトリクスのキャラクターにふわふわ浮く動きを付ける（山クラスターと同じ言葉づかい） */
+.mx-char {
+  animation: mxFloat var(--mx-fd, 3.6s) ease-in-out infinite;
+  animation-delay: var(--mx-d, 0s);
+}
+@keyframes mxFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mx-char { animation: none; }
+}
 
 
 @media (max-width: 380px) {

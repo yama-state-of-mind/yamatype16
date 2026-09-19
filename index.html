@@ -61,11 +61,63 @@
       </p>
       <button class="btn btn-primary" id="btn-start">診断をはじめる（約2分）</button>
       <p class="hero-note">全<span id="note-count">14</span>問・SNSでシェアできます</p>
-      <p class="hero-link">
-        <a href="about.html">診断の仕組み</a>
+      <p class="hero-link" id="hero-nav-links">
+        <a href="#about" id="link-about-from-hero">診断の仕組み</a>
         <a href="types.html?g=PS">16タイプの詳細</a>
       </p>
+      <div class="footprint-divider" id="hero-footprint-divider"></div>
     </div>
+
+    <section id="about" class="about-section">
+      <div id="about-outer">
+        <div class="about-inner">
+          <div class="about-lead">
+            <h2>診断の仕組み</h2>
+            <p>13の質問に答えるだけ。目的×仲間×計画×リスクの4つの軸から、<br>
+               あなたの登山スタイルを16タイプに分類します！</p>
+          </div>
+
+          <section class="legend">
+            <h2>登山スタイルの4つの軸</h2>
+            <p><b>目的 × 仲間 × 計画 × リスク</b><br>
+               この4つで、あなたの登山スタイルを診断します。4つの軸はそれぞれ2つの方向があり、
+               近いほうの文字が1つずつ決まります。アルファベット4文字で16タイプを表します。</p>
+            <div class="axis-table" id="axis-table"></div>
+          </section>
+
+          <section class="legend legend-plain">
+            <h2>生息エリアについて</h2>
+            <p>目的・仲間の組み合わせで、16タイプを4つの生息エリアに分類しています。
+               同じエリアなら山での過ごし方が近く、違うエリアなら見ている景色が違います。</p>
+            <div class="area-rows" id="area-rows"></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="matrix" id="about-matrix-wrap">
+        <p class="mx-axis mx-top"><b>P</b>高山・ピークハント</p>
+        <div class="mx-mid">
+          <p class="mx-axis mx-left"><b>G</b>グループ</p>
+          <div class="mx-grid" id="matrix">
+            <svg class="mx-cross" viewBox="0 0 300 300" aria-hidden="true">
+              <path d="M150 14 V286" stroke="#AFC3CF" stroke-width="2.4"/>
+              <path d="M14 150 H286" stroke="#AFC3CF" stroke-width="2.4"/>
+              <path d="M150 6 L144 18 L156 18 Z" fill="#AFC3CF"/>
+              <path d="M150 294 L144 282 L156 282 Z" fill="#AFC3CF"/>
+              <path d="M6 150 L18 144 L18 156 Z" fill="#AFC3CF"/>
+              <path d="M294 150 L282 144 L282 156 Z" fill="#AFC3CF"/>
+            </svg>
+          </div>
+          <p class="mx-axis mx-right"><b>S</b>ソロ</p>
+        </div>
+        <p class="mx-axis mx-bottom"><b>E</b>森・エンジョイ</p>
+      </div>
+
+      <p class="list-foot hero-link" style="text-align:center; margin-top:16px;">
+        <a href="types.html?g=PS">16タイプの詳細をもっと見る</a>
+      </p>
+    </section>
+
       <footer class="site-foot">
       <a href="https://x.com/yamastateofmind" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2.3h3.4l-7.4 8.5L23.6 22h-6.8l-5.3-7-6.1 7H2l7.9-9.1L1.6 2.3h7l4.8 6.4zM17.7 20h1.9L7.4 4.2H5.4z"/></svg>
@@ -73,6 +125,7 @@
     </a>
     </footer>
 </section>
+
 
   <!-- ========== 質問画面 ========== -->
   <section id="screen-quiz" class="screen">
@@ -223,6 +276,8 @@
         <div id="result-axes"><!-- 4軸バー --></div>
       </div>
 
+      <div class="footprint-divider" id="result-footprint-divider"></div>
+
       <section class="panel">
         <h3 class="panel-title">このタイプにおすすめの山</h3>
         <div class="mt-row" id="result-mountains"><!-- おすすめ3座 --></div>
@@ -238,7 +293,7 @@
         <button class="btn btn-ghost" id="btn-retry">もう一度診断する</button>
         <p class="hero-link">
           <a href="types.html?g=PS">16タイプの詳細</a>
-          <a href="about.html">診断の仕組み</a>
+          <a href="#about" id="link-about-from-result">診断の仕組み</a>
         </p>
       </div>
     </div>
@@ -247,6 +302,17 @@
 
 </div>
 
+
+<!-- ========== スクロール追従ヘッダー（.screenのtransform対策で.appの外に置く） ========== -->
+<header class="scroll-header" id="scroll-header">
+  <div class="scroll-header-inner">
+    <a href="#" class="sh-logo" id="sh-logo">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6 L34 32 L6 32 Z" fill="#1E3A31"/><path d="M20 6 L25 16 L15 16 Z" fill="#E0A33B"/></svg>
+      登山タイプ診断
+    </a>
+    <button class="sh-cta" id="sh-cta">診断をはじめる</button>
+  </div>
+</header>
 
 <!-- ========== シェア用モーダル（.screenのtransform対策で.appの外に置く） ========== -->
 <div class="smodal" id="smodal" hidden>

@@ -57,6 +57,11 @@ function showScreen(name) {
   Object.values(screens).forEach((s) => s.classList.remove("is-active"));
   screens[name].classList.add("is-active");
   window.scrollTo({ top: 0 });
+  // スクロールに連動して出るヘッダーは、画面が切り替わったら必ず一度隠す
+  // （スクロールイベントを待たずに確実に隠すための保険）
+  document.getElementById("scroll-header")?.classList.remove("show");
+  // 画面ごとに高さが変わるので、余白のキャラクターも位置を計算し直す
+  requestAnimationFrame(() => { if (typeof renderScatterChars === "function") renderScatterChars(); });
 }
 
 
@@ -183,6 +188,374 @@ function renderCluster() {
     </svg>`;
 }
 renderCluster();
+
+/* =========================================================
+   トップページ：about統合セクション（旧 about.html の中身を移植）
+   ========================================================= */
+function renderAboutSection() {
+  const axisTable = document.getElementById("axis-table");
+  if (!axisTable) return;   // このページにabout統合セクションがなければ何もしない
+
+  const AXIS_MEMO = {
+    PE: "目指すのは頂上？　それとも道のり？",
+    SG: "歩くのはひとり？　それとも誰かと？",
+    LF: "決めるのは事前？　それとも当日？",
+    CA: "迷ったら引く？　それとも行く？",
+  };
+  axisTable.innerHTML = AXES.map((ax) => `
+    <div class="ax-item">
+      <div class="ax-row">
+        <div class="ax-end l">
+          <span class="ax-word">${ax.aName}</span>
+          <span class="ax-ltr">${ax.a}</span>
+          <span class="ax-en">${ax.aEn}</span>
+        </div>
+        <div class="ax-mid">
+          <span class="ax-title">${ax.title}</span>
+          <svg class="ax-arrow" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M14 6 H106" stroke="#C3CFC8" stroke-width="1.6"/>
+            <path d="M2 6 L14 1.6 L14 10.4 Z" fill="#1E3A31"/>
+            <path d="M118 6 L106 1.6 L106 10.4 Z" fill="#46708F"/>
+          </svg>
+        </div>
+        <div class="ax-end r">
+          <span class="ax-word">${ax.bName}</span>
+          <span class="ax-ltr">${ax.b}</span>
+          <span class="ax-en">${ax.bEn}</span>
+        </div>
+      </div>
+      <p class="ax-memo">${AXIS_MEMO[ax.id]}</p>
+    </div>`).join("");
+
+  document.getElementById("area-rows").innerHTML = [
+    ["PS", "ピークハント", "ソロ"], ["PG", "ピークハント", "グループ"],
+    ["ES", "エンジョイ", "ソロ"],   ["EG", "エンジョイ", "グループ"],
+  ].map(([key, aj, bj]) => {
+    const g = GROUPS[key];
+    return `<div class="area-row">
+      <span class="ar-cmb">${aj} × ${bj}</span>
+      <span class="ar-arrow">→</span>
+      <span class="ar-chip" style="background:${g.band}">
+        ${areaIcon(key)}<b style="color:${g.deep}">${g.name}</b>
+      </span>
+    </div>`;
+  }).join("");
+
+  const MATRIX_ORDER = ["PG", "PS", "EG", "ES"];
+  const codesOf = (key) => Object.keys(TYPES).filter((c) => c.slice(0, 2) === key);
+  const matrix = document.getElementById("matrix");
+  matrix.insertAdjacentHTML("beforeend", MATRIX_ORDER.map((key) => {
+    const g = GROUPS[key];
+    const side = (key === "PG" || key === "EG") ? "l" : "r";
+    const row = (key === "PS" || key === "PG") ? "top" : "bottom";
+    return `
+      <div class="mx-cell mx-${side} mx-${row}" data-g="${key}" style="background:${g.band}">
+        <span class="mx-bg" style="color:${g.deep}">${g.name}</span>
+        <span class="mx-lead">${g.lead}</span>
+        <span class="mx-chars">
+          ${codesOf(key).map((c) => {
+            const ch = CHARACTERS[c];
+            return `<a class="mx-char" href="types.html?g=${key}#${c}"
+                       aria-label="${ch ? ch.animal : c}の紹介を見る">${characterSVG(c, "char", true)}</a>`;
+          }).join("")}
+        </span>
+      </div>`;
+  }).join(""));
+
+  matrix.addEventListener("click", (e) => {
+    if (e.target.closest(".mx-char")) return;   // キャラクターは個別のリンクに任せる
+    const cell = e.target.closest(".mx-cell");
+    if (cell) location.href = `types.html?g=${cell.dataset.g}`;
+  });
+}
+renderAboutSection();
+
+/* =========================================================
+   足跡アセット（サイト全体で共通）
+   肉球・鳥・ひづめ・翼（コウモリ）の4種類。すべてcurrentColorで塗るので、
+   使う場所のCSSのcolorだけで色を変えられる
+   ========================================================= */
+const FOOTPRINTS = {
+  paw: `<svg viewBox="0 0 100 100">
+    <ellipse cx="50" cy="66" rx="24" ry="20" fill="currentColor"/>
+    <ellipse cx="24" cy="34" rx="10" ry="13" fill="currentColor" transform="rotate(-18 24 34)"/>
+    <ellipse cx="42" cy="20" rx="10" ry="13" fill="currentColor" transform="rotate(-6 42 20)"/>
+    <ellipse cx="60" cy="20" rx="10" ry="13" fill="currentColor" transform="rotate(6 60 20)"/>
+    <ellipse cx="78" cy="34" rx="10" ry="13" fill="currentColor" transform="rotate(18 78 34)"/>
+  </svg>`,
+  bird: `<svg viewBox="0 0 100 100">
+    <path d="M50 92 L50 46" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 46 L20 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 46 L50 6"  stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 46 L80 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 92 L38 78" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+  </svg>`,
+  hoof: `<svg viewBox="0 0 100 100">
+    <path d="M48 12 C34 12 26 28 28 48 C30 66 38 82 48 86 C50 74 50 24 48 12 Z" fill="currentColor" transform="translate(-3 0)"/>
+    <path d="M52 12 C66 12 74 28 72 48 C70 66 62 82 52 86 C50 74 50 24 52 12 Z" fill="currentColor" transform="translate(3 0)"/>
+  </svg>`,
+  wing: `<svg viewBox="0 0 100 100">
+    <path d="M50 70 C34 66 20 54 14 34 C24 40 32 42 40 40 C34 30 30 20 30 10
+             C40 18 46 28 48 38 C48 26 50 14 54 6 C58 16 58 28 56 38
+             C62 26 68 18 76 12 C74 22 68 32 60 40 C68 40 76 36 84 28
+             C80 46 68 58 54 64 Z" fill="currentColor"/>
+    <ellipse cx="50" cy="78" rx="10" ry="8" fill="currentColor"/>
+  </svg>`,
+};
+
+// 診断タイプ・シークレット → 足跡の種類
+const TYPE_FOOTPRINT = {
+  PSLC: "hoof", PSLA: "bird", PSFC: "paw", PSFA: "paw",
+  PGLC: "bird", PGLA: "bird", PGFC: "bird", PGFA: "paw",
+  ESLC: "paw",  ESLA: "paw",  ESFC: "paw",  ESFA: "paw",
+  EGLC: "hoof", EGLA: "bird", EGFC: "paw",  EGFA: "paw",
+};
+const SECRET_FOOTPRINT = { bat: "wing", ptarmigan: "bird" };
+
+function footprintInner(key) {
+  return (FOOTPRINTS[key] || FOOTPRINTS.paw).trim().replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
+}
+
+/* 歩行風の区切り線：同じ向き・一方向に進みつつ、左右の足が交互に着地しているような
+   控えめな縦のずれを付ける。
+   pxWidthには実際のコンテナ幅（px）を渡す。viewBoxをその幅に一致させることで、
+   svgをwidth:100%で表示しても足跡の大きさが伸び縮みせず、個数だけが幅に応じて増減する */
+function trailDividerSVG(footKey, pxWidth) {
+  const spacing = 34;   // 足跡1つあたりに使う横幅の目安（px）
+  const size = 17, offset = 4, h = 30;
+  const w = Math.max(pxWidth, spacing * 4);
+  const count = Math.max(4, Math.floor(w / spacing));
+  const step = w / (count + 1);
+  const inner = footprintInner(footKey);
+  const items = Array.from({ length: count }, (_, i) => {
+    const x = step * (i + 1);
+    const y = h / 2 + (i % 2 === 0 ? -offset : offset);
+    return `<g transform="translate(${x - size / 2} ${y - size / 2}) rotate(-90 ${size / 2} ${size / 2}) scale(${size / 100})" opacity=".8">${inner}</g>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">${items}</svg>`;
+}
+
+/* トップページの区切り：足跡の種類はランダム（毎回変わる）。
+   種類は一度選んだら、リサイズ時も同じ種類を保つ */
+let heroFootprintKey = null;
+let resultFootprintKey = null;
+function renderHeroFootprintDivider() {
+  const box = document.getElementById("hero-footprint-divider");
+  if (!box) return;
+  if (!heroFootprintKey) {
+    const keys = Object.keys(FOOTPRINTS);
+    heroFootprintKey = keys[Math.floor(Math.random() * keys.length)];
+  }
+  box.innerHTML = trailDividerSVG(heroFootprintKey, box.clientWidth || box.getBoundingClientRect().width);
+}
+renderHeroFootprintDivider();
+
+/* =========================================================
+   余白の足跡散らし（ページ全体・全画面共通）
+   グリッドベース配置：120px四方のマス目に区切り、1マスにつき最大1個までとして
+   重なりを防ぐ。さらに全マスの20〜30%だけを間引いて選び、
+   選ばれたマスの中心から数pxランダムにズラして（ジッター）配置する。
+   動物本体ではなく足跡だけを、中央のコンテンツを避けつつ配置する。
+   全部try/catchで守り、万が一失敗しても他の機能に影響しないようにしてある。
+   ========================================================= */
+function renderScatterChars() {
+  try {
+    if (window.innerWidth < 768) {
+      const old = document.getElementById("scatter-layer");
+      if (old) old.remove();
+      return;
+    }
+
+    let layer = document.getElementById("scatter-layer");
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.id = "scatter-layer";
+      document.body.insertBefore(layer, document.body.firstChild);
+    }
+    layer.innerHTML = "";
+
+    // 今表示されている内容の実際の高さに合わせる（SPAの画面ごとに高さが違うため）
+    const activeScreen = document.querySelector(".screen.is-active");
+    const height = Math.max(
+      activeScreen ? activeScreen.scrollHeight : 0,
+      document.body.scrollHeight,
+      window.innerHeight
+    );
+    layer.style.height = height + "px";
+
+    // コンテンツの半幅の目安（index.htmlは480px幅、types.htmlは720px幅で中央寄せされているため）
+    const contentHalf = document.body.classList.contains("list-page-body") ? 360 : 240;
+    const viewportHalf = window.innerWidth / 2;
+
+    const keys = Object.keys(FOOTPRINTS);
+    const CELL = 120;          // マス目のサイズ(px)
+    const FILL_RATIO = 0.25;   // 全マスのうち配置するマスの割合（20〜30%の中央値）
+    const JITTER = CELL * 0.28; // マス中心からのズレの最大量(px)
+
+    const cols = Math.ceil(window.innerWidth / CELL);
+    const rows = Math.ceil(height / CELL);
+
+    // まず、中央のコンテンツ帯にかからないマスだけを候補として集める
+    const candidates = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cx = c * CELL + CELL / 2;
+        const cy = r * CELL + CELL / 2;
+        if (Math.abs(cx - viewportHalf) < contentHalf + 20) continue;
+        candidates.push({ cx, cy });
+      }
+    }
+
+    // 候補マスをシャッフルしてから、全体の20〜30%だけを間引いて選ぶ
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    const pickCount = Math.round(candidates.length * FILL_RATIO);
+    const chosen = candidates.slice(0, pickCount);
+
+    chosen.forEach(({ cx, cy }) => {
+      // マスの中心から、数pxだけランダムにズラす（ジッター効果）
+      const x = cx + (Math.random() * 2 - 1) * JITTER;
+      const y = cy + (Math.random() * 2 - 1) * JITTER;
+      const size = 14 + Math.random() * 14;
+      const key = keys[Math.floor(Math.random() * keys.length)];
+      const rot = Math.round(Math.random() * 360);
+
+      const el = document.createElement("div");
+      el.className = "scatter-print";
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.width = size + "px";
+      el.style.transform = `rotate(${rot}deg)`;
+      el.innerHTML = FOOTPRINTS[key];
+      layer.appendChild(el);
+    });
+  } catch (err) {
+    // 装飾のための機能なので、失敗しても他の動作を止めない
+    console.error("scatter render error", err);
+  }
+}
+renderScatterChars();
+
+let scatterUpdateTimer = null;
+function scheduleScatterUpdate() {
+  clearTimeout(scatterUpdateTimer);
+  scatterUpdateTimer = setTimeout(() => {
+    renderScatterChars();
+    // 区切り線も、幅が変わったら足跡の個数を計算し直す（種類は変えない）
+    renderHeroFootprintDivider();
+    const resultDivider = document.getElementById("result-footprint-divider");
+    if (resultDivider && resultFootprintKey) {
+      resultDivider.innerHTML = trailDividerSVG(resultFootprintKey, resultDivider.clientWidth || resultDivider.getBoundingClientRect().width);
+    }
+  }, 200);
+}
+window.addEventListener("resize", scheduleScatterUpdate);
+
+/* =========================================================
+   スクロール追従ヘッダー
+   下スクロールで隠れ、上スクロールでスッと出てくる。
+   質問・結果画面では出さない（診断の途中でリセットするミスタップを防ぐため）
+   ========================================================= */
+(function initScrollHeader() {
+  const header = document.getElementById("scroll-header");
+  if (!header) return;
+
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  function onScroll() {
+    // 質問・結果画面のあいだは、スクロールに関わらずヘッダーを出さない
+    const startActive = document.getElementById("screen-start")?.classList.contains("is-active");
+    if (!startActive) {
+      header.classList.remove("show");
+      lastY = window.scrollY;
+      return;
+    }
+    const y = window.scrollY;
+    if (y < 80) {
+      header.classList.remove("show");   // 一番上の方は本体のCTAが見えているので不要
+    } else if (y < lastY) {
+      header.classList.add("show");      // 上スクロール
+    } else if (y > lastY) {
+      header.classList.remove("show");   // 下スクロール
+    }
+    lastY = y;
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { onScroll(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // 診断をはじめる：トップページ本体の開始ボタンと同じ動作にする
+  document.getElementById("sh-cta")?.addEventListener("click", () => {
+    document.getElementById("btn-start")?.click();
+    header.classList.remove("show");
+  });
+  document.getElementById("sh-logo")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    header.classList.remove("show");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+})();
+
+/* =========================================================
+   スクロール連動アニメーション
+   見出し・カード・マトリクスの4エリアが、画面に入ったタイミングでふわっと現れる
+   ========================================================= */
+(function initScrollReveal() {
+  document.querySelectorAll(".about-lead, .legend, .matrix").forEach((el) => el.classList.add("sr-reveal"));
+  document.querySelectorAll(".mx-cell").forEach((el, i) => {
+    el.classList.add("sr-reveal-pop");
+    el.style.setProperty("--reveal-d", (i * 0.08).toFixed(2) + "s");
+  });
+
+  const targets = document.querySelectorAll(".sr-reveal, .sr-reveal-pop");
+  if (!targets.length) return;
+
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced || typeof IntersectionObserver === "undefined") {
+    targets.forEach((el) => el.classList.add("in-view"));
+    return;
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in-view");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+  targets.forEach((el) => io.observe(el));
+})();
+
+/* 結果画面から「診断の仕組み」を押したとき：
+   aboutセクションはスタート画面の中にあるので、まずスタート画面に戻ってからスクロールする */
+const linkAboutFromResult = document.getElementById("link-about-from-result");
+if (linkAboutFromResult) {
+  linkAboutFromResult.addEventListener("click", (e) => {
+    e.preventDefault();
+    showScreen("start");
+    requestAnimationFrame(() => {
+      document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+/* スタート画面本体から「診断の仕組み」を押したとき：
+   ページ内を滑らかにスクロール（同じページの中を移動している感覚が伝わるように） */
+const linkAboutFromHero = document.getElementById("link-about-from-hero");
+if (linkAboutFromHero) {
+  linkAboutFromHero.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
 
 /* ---------- 質問ページの描画 ---------- */
 function renderPage() {
@@ -485,6 +858,13 @@ function showResult() {
   grp.style.color = g.deep;
   const ch = CHARACTERS[code];
   const secret = findSecret(code);
+
+  // 結果の区切り線は、診断結果の動物の足跡で固定（シークレットならシークレット側の種類）
+  const resultDivider = document.getElementById("result-footprint-divider");
+  if (resultDivider) {
+    resultFootprintKey = secret ? (SECRET_FOOTPRINT[secret.id] || "paw") : (TYPE_FOOTPRINT[code] || "paw");
+    resultDivider.innerHTML = trailDividerSVG(resultFootprintKey, resultDivider.clientWidth || resultDivider.getBoundingClientRect().width);
+  }
 
   $("#result-char").innerHTML = secret
     ? secretSVG(secret.id, "char char-lg")

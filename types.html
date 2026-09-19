@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>16タイプの詳細｜登山タイプ診断</title>
 <meta name="description" content="登山タイプ診断の16タイプを、山の生き物のキャラクターと一緒に紹介します。">
-<link rel="canonical" href="https://yamatype16.vercel.app/types.html">
 <meta name="theme-color" content="#1E3A31">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +20,17 @@
 </script>
 </head>
 <body>
+
+<header class="scroll-header" id="scroll-header">
+  <div class="scroll-header-inner">
+    <a href="index.html" class="sh-logo">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6 L34 32 L6 32 Z" fill="#1E3A31"/><path d="M20 6 L25 16 L15 16 Z" fill="#E0A33B"/></svg>
+      登山タイプ診断
+    </a>
+    <a href="index.html" class="sh-cta">診断をはじめる</a>
+  </div>
+</header>
+
 
 <div class="list-page">
 
@@ -38,8 +48,8 @@
   </div>
 
   <p class="list-foot hero-link">
-    <a href="about.html">診断の仕組み</a>
     <a href="index.html">診断をはじめる</a>
+    <a href="index.html#about">診断の仕組み</a>
   </p>
 
 </div>
@@ -222,6 +232,8 @@ function showGroup(key, anchor) {
   } else {
     window.scrollTo({ top: 0 });
   }
+  // タブ切り替えで高さが変わるので、余白のキャラクターも位置を計算し直す
+  requestAnimationFrame(() => { if (typeof renderScatterChars === "function") renderScatterChars(); });
 }
 
 /* ---------- URLから初期表示を決める ----------
@@ -284,6 +296,130 @@ document.getElementById("group-body").addEventListener("click", (e) => {
 
 window.addEventListener("popstate", routeFromURL);
 routeFromURL();
+
+/* スクロール追従ヘッダー（このページは常時「トップページ相当」の扱いでよい） */
+(function initScrollHeader() {
+  const header = document.getElementById("scroll-header");
+  if (!header) return;
+  let lastY = window.scrollY;
+  let ticking = false;
+  function onScroll() {
+    const y = window.scrollY;
+    if (y < 80) header.classList.remove("show");
+    else if (y < lastY) header.classList.add("show");
+    else if (y > lastY) header.classList.remove("show");
+    lastY = y;
+  }
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { onScroll(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
+/* 足跡アセット（index.htmlと同じもの） */
+const FOOTPRINTS = {
+  paw: `<svg viewBox="0 0 100 100">
+    <ellipse cx="50" cy="66" rx="24" ry="20" fill="currentColor"/>
+    <ellipse cx="24" cy="34" rx="10" ry="13" fill="currentColor" transform="rotate(-18 24 34)"/>
+    <ellipse cx="42" cy="20" rx="10" ry="13" fill="currentColor" transform="rotate(-6 42 20)"/>
+    <ellipse cx="60" cy="20" rx="10" ry="13" fill="currentColor" transform="rotate(6 60 20)"/>
+    <ellipse cx="78" cy="34" rx="10" ry="13" fill="currentColor" transform="rotate(18 78 34)"/>
+  </svg>`,
+  bird: `<svg viewBox="0 0 100 100">
+    <path d="M50 92 L50 46" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 46 L20 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 46 L50 6"  stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 46 L80 12" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 92 L38 78" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+  </svg>`,
+  hoof: `<svg viewBox="0 0 100 100">
+    <path d="M48 12 C34 12 26 28 28 48 C30 66 38 82 48 86 C50 74 50 24 48 12 Z" fill="currentColor" transform="translate(-3 0)"/>
+    <path d="M52 12 C66 12 74 28 72 48 C70 66 62 82 52 86 C50 74 50 24 52 12 Z" fill="currentColor" transform="translate(3 0)"/>
+  </svg>`,
+  wing: `<svg viewBox="0 0 100 100">
+    <path d="M50 70 C34 66 20 54 14 34 C24 40 32 42 40 40 C34 30 30 20 30 10
+             C40 18 46 28 48 38 C48 26 50 14 54 6 C58 16 58 28 56 38
+             C62 26 68 18 76 12 C74 22 68 32 60 40 C68 40 76 36 84 28
+             C80 46 68 58 54 64 Z" fill="currentColor"/>
+    <ellipse cx="50" cy="78" rx="10" ry="8" fill="currentColor"/>
+  </svg>`,
+};
+
+/* 余白の足跡散らし（トップページと同じ考え方。このページは幅720pxのため半幅を360で計算）
+   グリッドベース配置：120px四方のマス目に区切り、1マスにつき最大1個までとして重なりを防ぐ。
+   全マスの20〜30%だけを間引いて選び、マス中心から数pxランダムにズラして（ジッター）配置する */
+function renderScatterChars() {
+  try {
+    if (window.innerWidth < 768) {
+      const old = document.getElementById("scatter-layer");
+      if (old) old.remove();
+      return;
+    }
+    let layer = document.getElementById("scatter-layer");
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.id = "scatter-layer";
+      document.body.insertBefore(layer, document.body.firstChild);
+    }
+    layer.innerHTML = "";
+    const height = Math.max(document.body.scrollHeight, window.innerHeight);
+    layer.style.height = height + "px";
+    const contentHalf = 360;
+    const viewportHalf = window.innerWidth / 2;
+
+    const keys = Object.keys(FOOTPRINTS);
+    const CELL = 120;
+    const FILL_RATIO = 0.25;
+    const JITTER = CELL * 0.28;
+
+    const cols = Math.ceil(window.innerWidth / CELL);
+    const rows = Math.ceil(height / CELL);
+
+    const candidates = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cx = c * CELL + CELL / 2;
+        const cy = r * CELL + CELL / 2;
+        if (Math.abs(cx - viewportHalf) < contentHalf + 20) continue;
+        candidates.push({ cx, cy });
+      }
+    }
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    const pickCount = Math.round(candidates.length * FILL_RATIO);
+    const chosen = candidates.slice(0, pickCount);
+
+    chosen.forEach(({ cx, cy }) => {
+      const x = cx + (Math.random() * 2 - 1) * JITTER;
+      const y = cy + (Math.random() * 2 - 1) * JITTER;
+      const size = 14 + Math.random() * 14;
+      const key = keys[Math.floor(Math.random() * keys.length)];
+      const rot = Math.round(Math.random() * 360);
+
+      const el = document.createElement("div");
+      el.className = "scatter-print";
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.width = size + "px";
+      el.style.transform = `rotate(${rot}deg)`;
+      el.innerHTML = FOOTPRINTS[key];
+      layer.appendChild(el);
+    });
+  } catch (err) {
+    console.error("scatter render error", err);
+  }
+}
+renderScatterChars();
+let scatterUpdateTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(scatterUpdateTimer);
+  scatterUpdateTimer = setTimeout(renderScatterChars, 200);
+
+});
 </script>
 </body>
 </html>
