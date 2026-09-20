@@ -329,30 +329,47 @@ function trailDividerSVG(footKey, pxWidth) {
 }
 
 /* トップページの区切り：足跡の種類はランダム（毎回変わる）。
-   種類は一度選んだら、リサイズ時も同じ種類を保つ */
+   種類は一度選んだら、リサイズ時も同じ種類を保つ。
+   ページ読み込み直後はレイアウトがまだ確定しておらず、幅の計測値が
+   一瞬0に近い値になることがあるため、小さすぎる場合は少し待って測り直す */
 let heroFootprintKey = null;
 let aboutFootprintKey = null;
 let resultFootprintKey = null;
-function renderHeroFootprintDivider() {
-  const box = document.getElementById("hero-footprint-divider");
+
+function renderFootprintDividerSafely(boxId, getKey, setKey, retry = 0) {
+  const box = document.getElementById(boxId);
   if (!box) return;
-  if (!heroFootprintKey) {
-    const keys = Object.keys(FOOTPRINTS);
-    heroFootprintKey = keys[Math.floor(Math.random() * keys.length)];
+  const width = box.clientWidth || box.getBoundingClientRect().width;
+  if (width < 100 && retry < 10) {
+    // まだレイアウトが確定していない可能性が高いので、次のフレームで測り直す
+    requestAnimationFrame(() => renderFootprintDividerSafely(boxId, getKey, setKey, retry + 1));
+    return;
   }
-  box.innerHTML = trailDividerSVG(heroFootprintKey, box.clientWidth || box.getBoundingClientRect().width);
+  let key = getKey();
+  if (!key) {
+    const keys = Object.keys(FOOTPRINTS);
+    key = keys[Math.floor(Math.random() * keys.length)];
+    setKey(key);
+  }
+  box.innerHTML = trailDividerSVG(key, width);
+}
+
+function renderHeroFootprintDivider() {
+  renderFootprintDividerSafely(
+    "hero-footprint-divider",
+    () => heroFootprintKey,
+    (k) => { heroFootprintKey = k; }
+  );
 }
 renderHeroFootprintDivider();
 
 /* about セクション末尾（16タイプの詳細をもっと見る の下）の区切り。こちらもランダム */
 function renderAboutFootprintDivider() {
-  const box = document.getElementById("about-footprint-divider");
-  if (!box) return;
-  if (!aboutFootprintKey) {
-    const keys = Object.keys(FOOTPRINTS);
-    aboutFootprintKey = keys[Math.floor(Math.random() * keys.length)];
-  }
-  box.innerHTML = trailDividerSVG(aboutFootprintKey, box.clientWidth || box.getBoundingClientRect().width);
+  renderFootprintDividerSafely(
+    "about-footprint-divider",
+    () => aboutFootprintKey,
+    (k) => { aboutFootprintKey = k; }
+  );
 }
 renderAboutFootprintDivider();
 
@@ -452,9 +469,8 @@ function scheduleScatterUpdate() {
     // 区切り線も、幅が変わったら足跡の個数を計算し直す（種類は変えない）
     renderHeroFootprintDivider();
     renderAboutFootprintDivider();
-    const resultDivider = document.getElementById("result-footprint-divider");
-    if (resultDivider && resultFootprintKey) {
-      resultDivider.innerHTML = trailDividerSVG(resultFootprintKey, resultDivider.clientWidth || resultDivider.getBoundingClientRect().width);
+    if (resultFootprintKey) {
+      renderFootprintDividerSafely("result-footprint-divider", () => resultFootprintKey, () => {});
     }
   }, 200);
 }
@@ -870,7 +886,11 @@ function showResult() {
   const resultDivider = document.getElementById("result-footprint-divider");
   if (resultDivider) {
     resultFootprintKey = secret ? (SECRET_FOOTPRINT[secret.id] || "PGLA") : code;
-    resultDivider.innerHTML = trailDividerSVG(resultFootprintKey, resultDivider.clientWidth || resultDivider.getBoundingClientRect().width);
+    renderFootprintDividerSafely(
+      "result-footprint-divider",
+      () => resultFootprintKey,
+      () => {}
+    );
   }
 
   $("#result-char").innerHTML = secret
