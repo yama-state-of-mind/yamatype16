@@ -1493,9 +1493,15 @@ body.header-visible .group-tabs { top: var(--header-h, 57px); }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 3px;
-  margin: 8px 0 6px;
+  margin: 8px 14px 6px;
 }
 .mx-chars svg { width: 100%; height: auto; display: block; }
+/* 整列しすぎて生き物っぽさが薄れないよう、1体ずつ小さめ・少し傾けて配置する */
+.mx-char { width: 84%; margin: 0 auto; }
+.mx-char:nth-child(1) { --mx-tilt: rotate(-7deg); --mx-d: 0s;    justify-self: end;   margin-right: 6%; }
+.mx-char:nth-child(2) { --mx-tilt: rotate(6deg);  --mx-d: .5s;   justify-self: start; margin-left: 6%; }
+.mx-char:nth-child(3) { --mx-tilt: rotate(5deg);  --mx-d: .9s;   justify-self: end;   margin-right: 4%; }
+.mx-char:nth-child(4) { --mx-tilt: rotate(-6deg); --mx-d: 1.4s;  justify-self: start; margin-left: 8%; }
 .mx-code {
   position: relative;
   display: block;
@@ -2026,14 +2032,15 @@ body.header-visible .group-tabs { top: var(--header-h, 57px); }
 }
 .scatter-print svg { display: block; width: 100%; height: auto; }
 
-/* マトリクスのキャラクターにふわふわ浮く動きを付ける（山クラスターと同じ言葉づかい） */
+/* マトリクスのキャラクターにふわふわ浮く動きを付ける（山クラスターと同じ言葉づかい）。
+   傾き（--mx-tilt）を消さないよう、キーフレームの中に含めて一緒に指定する */
 .mx-char {
   animation: mxFloat var(--mx-fd, 3.6s) ease-in-out infinite;
   animation-delay: var(--mx-d, 0s);
 }
 @keyframes mxFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-4px); }
+  0%, 100% { transform: var(--mx-tilt, none) translateY(0); }
+  50%      { transform: var(--mx-tilt, none) translateY(-4px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .mx-char { animation: none; }
